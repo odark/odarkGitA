@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<!-- 자주사용하는 패키지를 Alias로 설정할 수있다. -->
+
+  
+<mapper namespace="UserMapper">
+	<select id="findById" resultType="user">
+		select * from USERS where userId = #{userId}
+	</select>
+
+	<insert id="create">
+		insert into USERS values (#{userId},#{password},#{name},#{email})
+	</insert>
+
+	<update id="update">
+		update USERS set password = #{password}, name = #{name}, email = #{email} where userId = #{userId}
+	</update>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+	<!--  특정 위치의 controller 만 Scan하도록 설정한다. -->
+	<context:component-scan base-package="com.odark.web" >
+		<!-- 아래부분을 추가해주는 이유
+			spring mvc 설정xml파일내에서 controller component scan할때도 스캔되고 
+			또 applicationContext할때도 component scan되어 중복되어 생성될 수있으니 아래와 같이 추가적인 필터링이 필요하다.
+		 -->
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	<!-- controller 인식방법 (어노테이션기반으로 하겠다는의미)-->
+	<mvc:annotation-driven />
+	
+	<!-- 모든 요청을 web.xml의 서블릿맵핑경로로 인식해서 들어와버리기 때문에 resource파일들에 대한 접근설정 -->
+	<!-- URL상에 들어오는 mapping 이하에 해당하는 모든 요청들은 해당 resources location을 참조하라는 의미 -->
+	<mvc:resources location="/images/" mapping="/images/**" />
+	<mvc:resources location="/stylesheets/" mapping="/stylesheets/**" />
+	<mvc:resources location="/javascripts/" mapping="/javascripts/**" />
+	
+	<!-- view에 대한 설정 -->
+	<!-- WEB-INF밑으로 jsp및 다른 파일 자원들을 옮겨 스프링 서블릿을 통해서만 접근이 가능하도록 prefix위치를 잡아준다.-->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/WEB-INF/jsp/" 
+		p:suffix=".jsp" />
+		
+	<!-- 에러메시지를 보여주기 위해 properties을 읽어들이기 위한 설정을 추가해줘한다. -->	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+		p:basename="messages"
+		p:defaultEncoding="UTF-8"
+	/>
+
+</beans>

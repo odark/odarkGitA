@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<!-- @Alias 어노테이션를 가진 모든 클래스를 스캔하기 위한 package선언을 해준다. -->
+		<package name="com.odark.domain" />
+		
+		<!-- 명백하게 alias를 선언해주는 명시해줌 -->
+		<!-- <typeAlias alias="User" type="com.odark.domain.users.User" /> -->
+	</typeAliases>
+
+	<mappers>
+		<mapper resource="com/odark/dao/users/UserMapper.xml" />
+	</mappers>
+</configuration>

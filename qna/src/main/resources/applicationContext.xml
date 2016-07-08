@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+		
+	<!-- dao추가될때마다 매번 bean id 설정추가하는게 귀찮아서 controller찾듯이 아래처럼 설정한다. -->	
+	<context:component-scan base-package="com.odark.dao">
+		<!-- 해당 base패키지에 controller 어노테이션 클래스를 제외한 모든 어노테이션이 있을때 spring 빈으로 등록하라고 지정해주는의미 -->
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>	
+	
+	<!-- Database 설정파일 Read -->
+	<context:property-placeholder location="classpath:application-properties.xml" />
+
+	<!-- Test코드에서는 가능하지만 톰캣에서 띄울때는 어노테이션을 읽을수 있도록 설정해줘야함 -->
+	<context:annotation-config />
+
+	<!-- p옵션은 setter 인젝션 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		p:driverClassName="${database.driverClassName}" p:url="${database.url}"
+		p:username="${database.username}" p:password="${database.password}" />
+
+	<!--1. spring mybatis 연동관련 sqlsession추가 -->
+	<!-- 
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+		p:dataSource-ref="dataSource" 
+		p:configLocation="classpath:/applicatoin-config.xml"
+	/> -->
+	
+	<!--2. spring mybatis 연동관련 sqlsession추가 -->
+	<!-- p:mapperLocations="classpath:com/odark/dao/users/UserMapper.xml" 빼고 mybatis-config.xml에서 설정해주는걸로 파일추가해서 바꿈--> 
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+		p:dataSource-ref="dataSource" 
+		p:configLocation="classpath:/mybatis-config.xml"
+		/>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- 
+	<bean id="userDao" class="com.odark.dao.users.JdbcUserDao"
+		p:dataSource-ref="dataSource" />
+	 -->
+	 
+	<!--1. jdbc Dao는 dataSource를 받지만 mybatis dao는 sqlSession을 받는다. --> 
+	<!-- 
+	<bean id="userDao" class="com.odark.dao.users.MyBatisUserDao"
+		p:sqlSession-ref="sqlSession" 
+		p:dataSource-ref="dataSource"
+		/>
+	 -->
+	<!-- 2.flyway사용으로 초기화를 위한 dataSource를 더이상 받지 않는다. p:dataSource-ref="dataSource"삭제-->
+	<!-- <bean id="userDao" class="com.odark.dao.users.MyBatisUserDao"
+		p:sqlSession-ref="sqlSession" 
+	/> -->
+	
+	<!--3. 위처럼 매번추가해주는걸 막기위해 controller스캔하는것처럼 component scan할수있게 설정할수있다.<context:component-scan base-package="com.odark.web" />
+	해당 클래스에는 @Repository 어노테이션 추가 그리고 아래 userDao선언문자체가 필요없다. 단, 해당 dao에서 sqlSqlSession은 @Autowired 추가해줘야 의존성삽입된다.
+	 -->
+	<!-- <bean id="userDao" class="com.odark.dao.users.MyBatisUserDao"
+		p:sqlSession-ref="sqlSession" 
+	/> -->
+	
+		
+	<!-- 트랜잭션추가 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource"
+	/>
+	
+	<!-- 트랜잭션처리를 어노테이션기반으로 트랜잭션처리가 가능하도록 하기 위해 tx추가 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+</beans>
